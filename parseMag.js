@@ -1,13 +1,13 @@
 import usb, { InEndpoint, OutEndpoint } from 'usb';
 // lists all devices
-// console.log(usb.getDeviceList());
+//console.log(usb.getDeviceList());
 
 // specify port with vendorid + productid
 // console.log(usb.findByIds(1060,9492));
 
 // Define constants for vendorID and productID, look up "magic numbers" for more details.
-const VENDOR_ID = 1659;
-const PRODUCT_ID = 8963;
+const VENDOR_ID = 8457;
+const PRODUCT_ID = 2067;
 const device = usb.findByIds(VENDOR_ID, PRODUCT_ID);
 const allUSBDevices = usb.getDeviceList();
 
@@ -28,12 +28,24 @@ const deviceInterface = device.interfaces[0];
 if (!deviceInterface) {
   throw new Error('USB interface cannot be claimed because it is undefined.');
 }
+// Detach Raspberry Pi kernel driver for USB-RS232 device
+let driverAttached = false;
+if (deviceInterface.isKernelDriverActive()) {
+  driverAttached = true;
+  deviceInterface.detachKernelDriver()
+}
 // If device interface is defined, we can claim it and start polling.
 deviceInterface.claim();
 const inEndpoint = deviceInterface.endpoints[1];
 if (!inEndpoint) {
   throw new Error('Interface must be defined.');
 }
+// Reattach kernel driver for the interface.
+deviceInterface.release(() => {
+  if (driverAttached) {
+    deviceInterface.attachKernelDriver()
+  }
+})
 inEndpoint.startPoll(1, 64);
 // When new data comes in a data event will be fired on the receive endpoint
 inEndpoint.on('data', (dataBuf) => {

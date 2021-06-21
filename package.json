@@ -11,9 +11,9 @@
   "dependencies": {
     "usb": "^1.7.1"
   },
-  "repository" : {
-	"type": "git",
-	"url" : "https://github.com/Maverick131/Boomer-Maggy.git"
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Maverick131/Boomer-Maggy.git"
   },
   "type": "module"
 }
