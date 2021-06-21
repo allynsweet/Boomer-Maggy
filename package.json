@@ -1,0 +1,19 @@
+{
+  "name": "parse",
+  "version": "1.0.0",
+  "description": "prevent bad data string from entering Hypack",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "TMB",
+  "license": "ISC",
+  "dependencies": {
+    "usb": "^1.7.1"
+  },
+  "repository" : {
+	"type": "git",
+	"url" : "https://github.com/Maverick131/Boomer-Maggy.git"
+  },
+  "type": "module"
+}
