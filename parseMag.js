@@ -38,11 +38,10 @@ inEndpoint.startPoll(1, 64);
 // When new data comes in a data event will be fired on the receive endpoint
 inEndpoint.on('data', (dataBuf) => {
   // Convert buffer to array
-  let dataArr = Array.prototype.slice.call(new Uint8Array(dataBuf, 0, 8));
-  console.log(`Data Received: ${JSON.stringify(dataArr)}`);
+  let dataArr = dataBuf.toString();
+  console.log(`Data Received: ${dataArr}`);
 });
 console.log('Listening to USB for data.');
-
 
 // let string = /\d{5}\.\d{3}[\s,]\d{4}[\s,]\d{4}[\s,]\d{4}/;
 // console.log(string.test("12345.123,1234,1858,1234"))
