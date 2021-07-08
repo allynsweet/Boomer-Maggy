@@ -1,78 +1,78 @@
 import serialPort from 'serialport';
 
-//Define port location. Use  " ls /dev/tty* " in Raspberry Pi terminal to identitfy serial port path. 
+//Define port location. Use  " ls /dev/tty* " in Raspberry Pi terminal to identitfy serial port path.
 const portIn = new serialPort('/dev/tty.usbserial-14340', {
-  baudRate: 9600
+  baudRate: 9600,
 });
-const portOut = new serialPort('/dev/tty.usbserial-14330', {
-  baudRate: 9600
-});
+const portOut = new serialPort(
+  '/dev/tty.usbserial-14330',
+  {
+    baudRate: 9600,
+  },
+  function (err) {
+    if (err) {
+      return console.log('Error: ', err.message);
+    }
+  }
+);
 
 const cleanReadingArray = [];
 
-//Open Incoming Serial Port on Raspberry Pi
-portIn.on("open", function () {
-  console.log('Port In is open');
+// Logic
 
-  // Logic
+//Set variable to empty string.
+let reading = '';
+//This variable should equaul the length of the string that is being parsed.
+const FULL_READING_LENGTH = 17;
+//Regular expression. Refer to Javascript Regular Expressions when parsing new strings with different lengths/values.
+// (Hint: Eloquent JS -> Regular Expressions)
+const cleanReadingsRegex = /\W\w{5}[\s,]\d{3}\.\d{1}[\s,]\w{1}\W\d{1}\w{1}/;
 
-  //Set variable to empty string. 
-  let reading = '';
-  //This variable should equaul the length of the string that is being parsed.
-  const FULL_READING_LENGTH = 17;
-  //Regular expression. Refer to Javascript Regular Expressions when parsing new strings with different lengths/values.
-  // (Hint: Eloquent JS -> Regular Expressions)
-  const cleanReadingsRegex = /\W\w{5}[\s,]\d{3}\.\d{1}[\s,]\w{1}\W\d{1}\w{1}/;
+portIn.on('data', (data) => {
+  //Just in case there's whitespace on the reading, trim it and add reading
+  let character = data.toString('utf-8').trim();
+  // Confirm first character in the string is equal to $
+  // The first character needs to be a $ for a good reading.
+  const ANCHOR = '$';
+  if (reading.length === 0 && !character.includes(ANCHOR)) {
+    return;
+  }
+  reading += character;
 
-  portIn.on('data', (data) => {
+  //Don't do anything if reading is less than 17 characters.
+  if (reading.length < FULL_READING_LENGTH) {
+    return;
+  }
 
-    //Just in case there's whitespace on the reading, trim it and add reading
-    let character = data.toString('utf-8').trim();
-    // Confirm first character in the string is equal to $
-    // The first character needs to be a $ for a good reading.
-    const ANCHOR = '$'
-    if (reading.length === 0 && !character.includes(ANCHOR)) { return; }
-    reading += character;
-
-    //Don't do anything if reading is less than 17 characters.
-    if (reading.length < FULL_READING_LENGTH) { return; }
-
-    if (!reading.match(cleanReadingsRegex)) {
-      console.log(`Bad Reading: ${reading}`)
-      reading = '';
-      return;
-    }
-
-
-    //Reading is 17 characters, we can now decide to use or throw away.
-
-    // Reading does not match specifed regex, reset reading and don't do anything with it.
-    console.log(`Good Reading: ${reading}`)
-    // TODO send data to receiver.
-
-    portOut.on("open", function () {
-      console.log('Port Out is open')
-      //Reading matches specifed regex, send out serial port.
-      portOut.write(reading, function (error) {
-        if (error) {
-          console.error(error);
-          portOut.close(function (err) {
-            console.log('Port Out closed', err);
-          });
-          return;
-        }
-        console.log('Data successfully written.')
-        portOut.close(function (err) {
-          console.log('Port Out closed', err);
-        });
-      })
-    });
-    cleanReadingArray.push(reading);
+  if (!reading.match(cleanReadingsRegex)) {
+    console.log(`Bad Reading: ${reading}`);
     reading = '';
     return;
-  });
-  reading = '';
+  }
 
+  //Reading is 17 characters, we can now decide to use or throw away.
+
+  // Reading does not match specifed regex, reset reading and don't do anything with it.
+  console.log(`Good Reading: ${reading}`);
+  // TODO send data to receiver.
+
+  //Reading matches specifed regex, send out serial port.
+  portOut.write(reading, function (error) {
+    if (error) {
+      console.error(error);
+      portOut.close(function (err) {
+        console.log('Port Out closed', err);
+      });
+      return;
+    }
+    console.log('Data successfully written.');
+    portOut.close(function (err) {
+      console.log('Port Out closed', err);
+    });
+  });
+  cleanReadingArray.push(reading);
+  reading = '';
+  return;
 });
 
 process.on('SIGINT', function () {
@@ -89,4 +89,3 @@ process.on('exit', function () {
   portOut.close();
   portIn.close();
 });
-
