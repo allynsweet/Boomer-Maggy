@@ -37,6 +37,7 @@ portIn.on('data', (data) => {
   if (reading.length === 0 && !character.includes(ANCHOR)) {
     return;
   }
+  
   reading += character;
 
   //Don't do anything if reading is less than 17 characters.
@@ -44,31 +45,23 @@ portIn.on('data', (data) => {
     return;
   }
 
+  // Reading does not match specified regex, reset reading and don't do anything with it.
   if (!reading.match(cleanReadingsRegex)) {
     console.log(`Bad Reading: ${reading}`);
     reading = '';
     return;
   }
 
-  //Reading is 17 characters, we can now decide to use or throw away.
-
-  // Reading does not match specifed regex, reset reading and don't do anything with it.
   console.log(`Good Reading: ${reading}`);
   // TODO send data to receiver.
 
-  //Reading matches specifed regex, send out serial port.
+  //Reading matches specified regex, send out serial port.
   portOut.write(reading, function (error) {
     if (error) {
       console.error(error);
-      portOut.close(function (err) {
-        console.log('Port Out closed', err);
-      });
       return;
     }
     console.log('Data successfully written.');
-    portOut.close(function (err) {
-      console.log('Port Out closed', err);
-    });
   });
   cleanReadingArray.push(reading);
   reading = '';
