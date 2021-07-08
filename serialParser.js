@@ -4,9 +4,7 @@ import serialPort from 'serialport';
 const portIn = new serialPort('/dev/tty.usbserial-14130', {
   baudRate: 9600,
 });
-const portOut = new serialPort(
-  '/dev/tty.usbserial-14140',
-  {
+const portOut = new serialPort('/dev/tty.usbserial-14140', {
     baudRate: 9600,
   },
   function (err) {
@@ -25,17 +23,17 @@ let goodReadingCount = 0;
 //Set variable to empty string.
 let reading = '';
 //This variable should equaul the length of the string that is being parsed.
-const FULL_READING_LENGTH = 17;
+const FULL_READING_LENGTH = 24;
 //Regular expression. Refer to Javascript Regular Expressions when parsing new strings with different lengths/values.
 // (Hint: Eloquent JS -> Regular Expressions)
-const cleanReadingsRegex = /\W\w{5}[\s,]\d{3}\.\d{1}[\s,]\w{1}\W\d{1}\w{1}/;
+const cleanReadingsRegex = /\d{5}\.\d{3}[\s,]\d{4}[\s,]\d{4}[\s,]\d{4}/;
 
 portIn.on('data', (data) => {
   //Just in case there's whitespace on the reading, trim it and add reading
   let character = data.toString('utf-8').trim();
   // Confirm first character in the string is equal to $
   // The first character needs to be a $ for a good reading.
-  const ANCHOR = '$';
+  const ANCHOR = '.';
   if (reading.length === 0 && !character.includes(ANCHOR)) {
     badReadingCount += 1;
     return;
