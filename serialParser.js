@@ -37,7 +37,7 @@ portIn.on('data', (data) => {
   if (reading.length === 0 && !character.includes(ANCHOR)) {
     return;
   }
-  
+
   reading += character;
 
   //Don't do anything if reading is less than 17 characters.
@@ -56,17 +56,23 @@ portIn.on('data', (data) => {
   // TODO send data to receiver.
 
   //Reading matches specified regex, send out serial port.
-  portOut.write(reading, function (error) {
+  writeAndDrain(reading);
+
+  cleanReadingArray.push(reading);
+  reading = '';
+  return;
+});
+
+function writeAndDrain(data) {
+  portOut.write(data);
+  portOut.drain(function (error) {
     if (error) {
       console.error(error);
       return;
     }
     console.log('Data successfully written.');
   });
-  cleanReadingArray.push(reading);
-  reading = '';
-  return;
-});
+}
 
 process.on('SIGINT', function () {
   portOut.close();
