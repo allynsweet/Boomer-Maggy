@@ -1,11 +1,11 @@
 import serialPort from 'serialport';
 
 //Define port location. Use  " ls /dev/tty* " in Raspberry Pi terminal to identitfy serial port path.
-const portIn = new serialPort('/dev/tty.usbserial-14340', {
+const portIn = new serialPort('/dev/tty.usbserial-14130', {
   baudRate: 9600,
 });
 const portOut = new serialPort(
-  '/dev/tty.usbserial-14330',
+  '/dev/tty.usbserial-14140',
   {
     baudRate: 9600,
   },
@@ -17,6 +17,8 @@ const portOut = new serialPort(
 );
 
 const cleanReadingArray = [];
+let badReadingCount = 0;
+let goodReadingCount = 0;
 
 // Logic
 
@@ -35,6 +37,7 @@ portIn.on('data', (data) => {
   // The first character needs to be a $ for a good reading.
   const ANCHOR = '$';
   if (reading.length === 0 && !character.includes(ANCHOR)) {
+    badReadingCount += 1;
     return;
   }
 
@@ -48,11 +51,13 @@ portIn.on('data', (data) => {
   // Reading does not match specified regex, reset reading and don't do anything with it.
   if (!reading.match(cleanReadingsRegex)) {
     console.log(`Bad Reading: ${reading}`);
+    badReadingCount += 1;
     reading = '';
     return;
   }
 
   console.log(`Good Reading: ${reading}`);
+  goodReadingCount += 1;
   // TODO send data to receiver.
 
   //Reading matches specified regex, send out serial port.
@@ -73,18 +78,22 @@ function writeAndDrain(data) {
     console.log('Data successfully written.');
   });
 }
+reading = ' '
 
 process.on('SIGINT', function () {
-  portOut.close();
-  portIn.close();
+  cleanup();
 });
 
 process.on('uncaughtException', function () {
-  portOut.close();
-  portIn.close();
+  cleanup();
 });
 
 process.on('exit', function () {
-  portOut.close();
-  portIn.close();
+  cleanup();
 });
+
+function cleanup() {
+console.log(`Number of good readings: ${goodReadingCount}. \n Bad readings thrown out: ${badReadingCount}`);
+portOut.close();
+portIn.close();
+}
