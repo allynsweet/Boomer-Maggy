@@ -56,7 +56,7 @@ portIn.on('data', (data) => {
   // TODO send data to receiver.
 
   //Reading matches specified regex, send out serial port.
-  writeAndDrain(reading);
+  writeAndDrain(`${reading}\n`);
 
   cleanReadingArray.push(reading);
   reading = '';
