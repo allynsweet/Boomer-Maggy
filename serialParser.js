@@ -23,19 +23,19 @@ let goodReadingCount = 0;
 //Set variable to empty string.
 let reading = '';
 //This variable should equaul the length of the string that is being parsed.
-const FULL_READING_LENGTH = 24;
+const FULL_READING_LENGTH = 25;
 //Regular expression. Refer to Javascript Regular Expressions when parsing new strings with different lengths/values.
 // (Hint: Eloquent JS -> Regular Expressions)
-const cleanReadingsRegex = /\d{5}\.\d{3}[\s,]\d{4}[\s,]\d{4}[\s,]\d{4}/;
+const cleanReadingsRegex = /\W\d{5}\.\d{3}[\s,]\d{4}[\s,]\d{4}[\s,]\d{4}/;
 
 portIn.on('data', (data) => {
   //Just in case there's whitespace on the reading, trim it and add reading
   let character = data.toString('utf-8').trim();
   // Confirm first character in the string is equal to $
   // The first character needs to be a $ for a good reading.
-  const ANCHOR = '.';
+  const ANCHOR = '$';
   if (reading.length === 0 && !character.includes(ANCHOR)) {
-    badReadingCount += 1;
+    //badReadingCount += 1;
     return;
   }
 
