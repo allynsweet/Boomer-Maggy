@@ -23,9 +23,9 @@ let goodReadingCount = 0;
 //Set variable to empty string.
 let reading = '';
 //This variable should equaul the length of the string that is being parsed.
-const FULL_READING_LENGTH_LESSTHAN = 24;
-const FULL_READING_LENGTH = 25;
-const FULL_READING_LENGTH_GREATERTHAN = 26;
+const FULL_READING_LENGTH_LESSTHAN = 24
+const FULL_READING_LENGTH = 25
+const FULL_READING_LENGTH_GREATERTHAN = 26
 //Regular expression. Refer to Javascript Regular Expressions when parsing new strings with different lengths/values.
 // (Hint: Eloquent JS -> Regular Expressions)
 const cleanReadingsRegex = /\W\d{5}\.\d{3}[\s,]\d{4}[\s,]\d{4}[\s,]\d{4}/;
@@ -45,6 +45,13 @@ portIn.on('data', (data) => {
 
   reading += character;
 
+  if (reading.length == FULL_READING_LENGTH_LESSTHAN && !reading.match(lessThan10000) {
+    console.log(`Bad Reading: ${reading}`);
+    badReadingCount += 1;
+    reading = '';
+    return;
+  }
+  
   //Don't do anything if reading is less than 17 characters.
   if (reading.length < FULL_READING_LENGTH) {
     return;
@@ -52,7 +59,7 @@ portIn.on('data', (data) => {
 
 
   // Reading does not match specified regex, reset reading and don't do anything with it.
-  if (!reading.match(cleanReadingsRegex) || !reading.match(lessThan10000) || !reading.match(greaterThan100000)) {
+  if (!reading.match(cleanReadingsRegex) || !reading.match(greaterThan100000)) {
     console.log(`Bad Reading: ${reading}`);
     badReadingCount += 1;
     reading = '';
