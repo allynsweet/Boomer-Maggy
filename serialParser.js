@@ -35,9 +35,16 @@ portIn.on('data', (character) => {
   portOut.on("open", function () {
     console.log('Port Out is open')
 // Reading matches specifed regex, send out serial port.
-    serialPort.write(reading, function () {
-        console.log('Data is being written')
-      }) 
+  portOut.on('data out', function () {
+    if (reading=true) {
+    portOut.write(reading, function () {
+      console.log('Data is being written')
+    })
+  }
+
+    //serialPort.write(reading, function () {
+       // console.log('Data is being written')
+     // }) 
    });
   });
   
