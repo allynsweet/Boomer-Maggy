@@ -5,3 +5,4 @@ The purpose of this program is to electronically filter garbled characters from 
 # Usage 
 
 Clone the repoistory on a Raspberry pi, then connect a usb-serial cable to a usb port on the pi.
+
