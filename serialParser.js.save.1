@@ -46,13 +46,13 @@ portIn.on('data', (data) => {
   reading += character;
 
   //Don't do anything if reading is less than 17 characters.
-  if (reading.length < FULL_READING_LENGTH) {
+  if (reading.length < FULL_READING_LENGTH_LESSTHAN) {
     return;
   }
 
 
   // Reading does not match specified regex, reset reading and don't do anything with it.
-  if (!reading.match(cleanReadingsRegex || lessThan10000 || greaterThan100000)) {
+  if (!reading.match(lessThan10000 || cleanReadingsRegex || greaterThan100000)) {
     console.log(`Bad Reading: ${reading}`);
     badReadingCount += 1;
     reading = '';
