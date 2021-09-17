@@ -52,7 +52,7 @@ portIn.on('data', (data) => {
 
 
   // Reading does not match specified regex, reset reading and don't do anything with it.
-  if (!reading.match(cleanReadingsRegex || lessThan10000 || greaterThan100000)) {
+  if (!reading.match(cleanReadingsRegex) || !reading.match(lessThan10000) || !reading.match(greaterThan100000)) {
     console.log(`Bad Reading: ${reading}`);
     badReadingCount += 1;
     reading = '';
