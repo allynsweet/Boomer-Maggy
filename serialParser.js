@@ -38,12 +38,9 @@ const LONG_READING_LENGTH = 26;
 //Regular expression. Refer to Javascript Regular Expressions when parsing new strings with different lengths/values.
 // (Hint: Eloquent JS -> Regular Expressions)
 
-// Example for cleanReadingsRegex: $34687.456,8475,1284,8364
-const cleanReadingsRegex = /\W\d{5}\.\d{3}[\s,]\d{4}[\s,]\d{4}[\s,]\d{4}/;
-//Example for cleanReadingsRegex1: $9833.756,8374,2453,9876
-const cleanReadingsRegex1 = /\W\d{4}\.\d{3}[\s,]\d{4}[\s,]\d{4}[\s,]\d{4}/;
-//Example for cleanReadingsRegex2: $100645.856,8712,4327,7364
-const cleanReadingsRegex2 = /\W\d{6}\.\d{3}[\s,]\d{4}[\s,]\d{4}[\s,]\d{4}/;
+// Check for the starting digits to include 4, 5, or 6.
+// Example: $34687.456,8475,1284,8364 or $9833.756,8374,2453,9876 or $100645.856,8712,4327,7364
+const cleanRegex = /\W(?:\d{4}|\d{5}|\d{6})\.\d{3}[\s,]\d{4}[\s,]\d{4}[\s,]\d{4}/;
 
 //-------------------------------------------------------------------
 
@@ -56,23 +53,17 @@ portIn.on('data', (data) => {
 // Confirm first character in the string is equal to $
 // The first character needs to be a $ for a good reading.
   const ANCHOR = '$';
-  if (reading.length === 0 && !character.includes(ANCHOR)) {
-    //badReadingCount += 1;
-    return;
-  }
+  if (reading.length === 0 && !character.includes(ANCHOR)) { return; }
   // build string  
   reading += character;
 
 //Data that proceeds to logic should be between 24-26 characters.
-  if (reading.length < SHORT_READING_LENGTH) {
+  if (reading.length < SHORT_READING_LENGTH || reading.length > LONG_READING_LENGTH) {
     return;
   } 
-  if (reading.length > LONG_READING_LENGTH) {
-    return;
-  }
-
+  
 // Reading does not match specified regex, reset reading and don't do anything with it
-  if (reading.length === 24 && !reading.match(cleanReadingsRegex1)) {
+  if (reading.length === 24 && !reading.match(cleanRegex)) {
     console.log(`Reading is greater than 10000 Gamma: ${reading}`);
     return;
   }
@@ -84,7 +75,7 @@ portIn.on('data', (data) => {
   }
 
 // Reading does not match specified regex, reset reading and don't do anything with it
-  if (reading.length === 26 && !reading.match(cleanReadingsRegex2)) {
+  if (reading.length === 26 && !reading.match(cleanRegex)) {
     console.log(`Bad reading: ${reading}`);
     badReadingCount += 1
     reading = '';
