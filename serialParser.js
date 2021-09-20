@@ -1,6 +1,9 @@
+//import serialport library. To install, use "npm install serialport" in raspberry pi terminal were source code exists.
 import serialPort from 'serialport';
 
 //Define port location. Use  " ls /dev/tty* " in Raspberry Pi terminal to identitfy serial port path.
+//Fixed ports should have "portIn" as upper left, "portOut is upper right"
+//Ping ports
 const portIn = new serialPort('/dev/tty-portIn', {
   baudRate: 9600,
 });
@@ -14,54 +17,76 @@ const portOut = new serialPort('/dev/tty-portOut', {
   }
 );
 
+
+// Set up cleanReadingArray for sending good data, badReading counter, goodReadingCounter
 const cleanReadingArray = [];
 let badReadingCount = 0;
 let goodReadingCount = 0;
 
-// Logic
 
-//Set variable to empty string.
+
+// Logic
+//--------------------------------------------------------------------------------------------------
+//Set string of data to empty string.
 let reading = '';
-//This variable should equaul the length of the string that is being parsed.
-const FULL_READING_LENGTH_LESSTHAN = 24
-const FULL_READING_LENGTH = 25
-const FULL_READING_LENGTH_GREATERTHAN = 26
+
+// Good data strings exist between 24-26 characters. 
+const SHORT_READING_LENGTH = 24;
+const LONG_READING_LENGTH = 26;
+
+
 //Regular expression. Refer to Javascript Regular Expressions when parsing new strings with different lengths/values.
 // (Hint: Eloquent JS -> Regular Expressions)
-const cleanReadingsRegex = /\W\d{5}\.\d{3}[\s,]\d{4}[\s,]\d{4}[\s,]\d{4}/;
-const lessThan10000 = /\W\d{4}\.\d{3}[\s,]\d{4}[\s,]\d{4}[\s,]\d{4}/;
-const greaterThan100000 = /\W\d{6}\.\d{3}[\s,]\d{4}[\s,]\d{4}[\s,]\d{4}/;
 
+// Example for cleanReadingsRegex: $34687.456,8475,1284,8364
+const cleanReadingsRegex = /\W\d{5}\.\d{3}[\s,]\d{4}[\s,]\d{4}[\s,]\d{4}/;
+//Example for cleanReadingsRegex1: $9833.756,8374,2453,9876
+const cleanReadingsRegex1 = /\W\d{4}\.\d{3}[\s,]\d{4}[\s,]\d{4}[\s,]\d{4}/;
+//Example for cleanReadingsRegex2: $100645.856,8712,4327,7364
+const cleanReadingsRegex2 = /\W\d{6}\.\d{3}[\s,]\d{4}[\s,]\d{4}[\s,]\d{4}/;
+
+//-------------------------------------------------------------------
+
+
+//open portIn with incoming data called "data"
 portIn.on('data', (data) => {
-  //Just in case there's whitespace on the reading, trim it and add reading
+//Convert all data incoming to a string and just in case there's whitespace on the reading, trim it. Assign the string to 
+//variable "character". 
   let character = data.toString('utf-8').trim();
-  // Confirm first character in the string is equal to $
-  // The first character needs to be a $ for a good reading. This can be changed for different strings.
+// Confirm first character in the string is equal to $
+// The first character needs to be a $ for a good reading.
   const ANCHOR = '$';
   if (reading.length === 0 && !character.includes(ANCHOR)) {
     //badReadingCount += 1;
     return;
   }
-
+  // build string  
   reading += character;
 
-  if (reading.length == FULL_READING_LENGTH_LESSTHAN && !reading.match(lessThan10000) {
-    console.log(`Bad Reading: ${reading}`);
-    badReadingCount += 1;
-    reading = '';
+//Data that proceeds to logic should be between 24-26 characters.
+  if (reading.length < SHORT_READING_LENGTH) {
     return;
-  }
-  
-  //Don't do anything if reading is less than 17 characters.
-  if (reading.length < FULL_READING_LENGTH) {
+  } 
+  if (reading.length > LONG_READING_LENGTH) {
     return;
   }
 
+// Reading does not match specified regex, reset reading and don't do anything with it
+  if (reading.length === 24 && !reading.match(cleanReadingsRegex1)) {
+    console.log(`Reading is greater than 10000 Gamma: ${reading}`);
+    return;
+  }
 
-  // Reading does not match specified regex, reset reading and don't do anything with it.
-  if (!reading.match(cleanReadingsRegex) || !reading.match(greaterThan100000)) {
-    console.log(`Bad Reading: ${reading}`);
-    badReadingCount += 1;
+// Reading does not match specified regex, reset reading and don't do anything with it.
+  if (reading.length === 25 && !reading.match(cleanReadingsRegex)) {
+    console.log(`Reading is greater than 99999 Gamma: ${reading}`);
+    return;
+  }
+
+// Reading does not match specified regex, reset reading and don't do anything with it
+  if (reading.length === 26 && !reading.match(cleanReadingsRegex2)) {
+    console.log(`Bad reading: ${reading}`);
+    badReadingCount += 1
     reading = '';
     return;
   }
